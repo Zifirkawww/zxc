@@ -50,7 +50,7 @@ for (let i = 10; i < 20; i++) {
         soldierName: names[i],
         rank: getRandom(RANKS),
         gender: 'ж',
-        exerciseType: 'Віджимання',
+        exerciseType: 'згибання та розгибання рук в упорі лежачи ',
         result: String(20 + Math.floor(Math.random() * 21)),
         unit: getRandom(UNITS),
         notes: ''
@@ -59,7 +59,7 @@ for (let i = 10; i < 20; i++) {
         soldierName: names[i],
         rank: getRandom(RANKS),
         gender: 'ж',
-        exerciseType: 'Прес',
+        exerciseType: 'Згинання та розгинання тулубу лежачи ',
         result: String(30 + Math.floor(Math.random() * 31)),
         unit: getRandom(UNITS),
         notes: ''

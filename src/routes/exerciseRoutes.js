@@ -1,12 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const exerciseController = require('../controllers/exerciseController');
+const { protect, restrictTo } = require('../middleware/auth');
 
-// Маршрути для роботи з фізичними вправами
-router.get('/', exerciseController.getAllExercises);
-router.get('/:id', exerciseController.getExerciseById);
-router.post('/', exerciseController.createExercise);
-router.put('/:id', exerciseController.updateExercise);
-router.delete('/:id', exerciseController.deleteExercise);
+// Публічні маршрути
+router.get('/', protect, exerciseController.getAllExercises);
+router.get('/:id', protect, exerciseController.getExerciseById);
+
+// Маршрути тільки для адміністраторів
+router.post('/', protect, restrictTo('admin'), exerciseController.createExercise);
+router.put('/:id', protect, restrictTo('admin'), exerciseController.updateExercise);
+router.delete('/:id', protect, restrictTo('admin'), exerciseController.deleteExercise);
 
 module.exports = router;

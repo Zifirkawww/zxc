@@ -1,352 +1,418 @@
+// DOM елементи для роботи з вправами
+const exercisesList = document.getElementById('exercises-list');
+let addExerciseBtn;
+let addExerciseModal;
+let saveExerciseBtn;
+
+// Ініціалізація елементів після завантаження DOM
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = '/api/exercises';
-    let exercises = [];
-    let editId = null; // Додаємо змінну для зберігання id редагування
+    addExerciseBtn = document.getElementById('add-exercise-btn');
+    saveExerciseBtn = document.getElementById('save-exercise-btn');
+    const updateExerciseBtn = document.getElementById('update-exercise-btn');
 
-    // DOM Elements
-    const exerciseForm = document.getElementById('exerciseForm');
-    const formContainer = document.querySelector('.form-container'); // Додаємо посилання на контейнер форми
-    const resultsBody = document.getElementById('resultsBody');
-    const searchInput = document.getElementById('searchInput');
-    const filterExercise = document.getElementById('filterExercise');
-    // Додаємо елементи для керування вкладкою результатів
-    const resultsSection = document.getElementById('resultsSection'); // обгортає таблицю та фільтри
-    const showResultsBtn = document.getElementById('showResultsBtn');
-    // Додаємо елементи для керування вкладкою лідерів
-    const leadersSection = document.getElementById('leadersSection');
-    const showLeadersBtn = document.getElementById('showLeadersBtn');
-    const leadersBody = document.getElementById('leadersBody');
-    const leadersTitle = document.getElementById('leadersTitle');
-    const filterLeadersExercise = document.getElementById('filterLeadersExercise');
-    // Додаємо елемент для керування формою
-    const showFormBtn = document.getElementById('showFormBtn');
+    // Ініціалізація модальних вікон
+    const addModalElement = document.getElementById('add-exercise-modal');
+    if (addModalElement) {
+        addExerciseModal = new bootstrap.Modal(addModalElement);
+    }
 
-    // Початково ховаємо секцію результатів
-    if (resultsSection) resultsSection.classList.add('hidden');
-    // Початково ховаємо секцію лідерів
-    if (leadersSection) leadersSection.classList.add('hidden');
-    // Початково ховаємо форму
-    if (formContainer) formContainer.classList.add('hidden');
-
-    // Додаємо обробник для кнопки показу форми
-    if (showFormBtn) {
-        showFormBtn.addEventListener('click', () => {
-            if (formContainer.classList.contains('hidden')) {
-                // Показуємо форму
-                formContainer.classList.remove('hidden');
-                showFormBtn.textContent = 'Сховати форму';
-
-                // Ховаємо результати, якщо вони відкриті
-                if (resultsSection && !resultsSection.classList.contains('hidden')) {
-                    resultsSection.classList.add('hidden');
-                    if (showResultsBtn) showResultsBtn.textContent = 'Показати результати';
-                }
-
-                // Ховаємо лідерів, якщо вони відкриті
-                if (leadersSection && !leadersSection.classList.contains('hidden')) {
-                    leadersSection.classList.add('hidden');
-                    if (showLeadersBtn) showLeadersBtn.textContent = 'ЛІДЕРИ';
-                }
-            } else {
-                // Ховаємо форму
-                formContainer.classList.add('hidden');
-                showFormBtn.textContent = 'Додати результат';
-            }
+    // Додавання обробників подій
+    if (addExerciseBtn) {
+        addExerciseBtn.addEventListener('click', () => {
+            // Відкриття модального вікна
+            addExerciseModal.show();
         });
     }
 
-    if (showResultsBtn) {
-        showResultsBtn.addEventListener('click', () => {
-            if (resultsSection) {
-                if (resultsSection.classList.contains('hidden')) {
-                    resultsSection.classList.remove('hidden');
-                    loadExercises();
-                    showResultsBtn.textContent = 'Сховати результати';
-
-                    // Ховаємо форму
-                    if (formContainer) formContainer.classList.add('hidden');
-                    // Оновлюємо текст кнопки форми
-                    if (showFormBtn) showFormBtn.textContent = 'Додати результат';
-
-                    // Автоматично ховаємо лідерів
-                    if (leadersSection && !leadersSection.classList.contains('hidden')) {
-                        leadersSection.classList.add('hidden');
-                        if (showLeadersBtn) showLeadersBtn.textContent = 'ЛІДЕРИ';
-                    }
-                } else {
-                    resultsSection.classList.add('hidden');
-                    showResultsBtn.textContent = 'Показати результати';
-                }
-            }
-        });
+    // Додавання обробника для кнопки збереження результату
+    if (saveExerciseBtn) {
+        saveExerciseBtn.addEventListener('click', addExercise);
     }
 
-    if (showLeadersBtn) {
-        showLeadersBtn.addEventListener('click', () => {
-            if (leadersSection.classList.contains('hidden')) {
-                // Показуємо лідерів і автоматично ховаємо результати
-                leadersSection.classList.remove('hidden');
-                showLeadersBtn.textContent = 'Сховати лідерів';
-                loadLeaders();
-
-                // Ховаємо форму
-                if (formContainer) formContainer.classList.add('hidden');
-                // Оновлюємо текст кнопки форми
-                if (showFormBtn) showFormBtn.textContent = 'Додати результат';
-
-                // Автоматично ховаємо результати
-                if (resultsSection && !resultsSection.classList.contains('hidden')) {
-                    resultsSection.classList.add('hidden');
-                    if (showResultsBtn) showResultsBtn.textContent = 'Показати результати';
-                }
-            } else {
-                leadersSection.classList.add('hidden');
-                showLeadersBtn.textContent = 'ЛІДЕРИ';
-            }
-        });
+    // Додавання обробника для кнопки оновлення результату
+    if (updateExerciseBtn) {
+        updateExerciseBtn.addEventListener('click', updateExercise);
     }
 
-    // Load exercises
-    const loadExercises = async () => {
-        try {
-            const response = await fetch(API_URL);
-            exercises = await response.json();
-            renderExercises();
-        } catch (error) {
-            console.error('Помилка завантаження даних:', error);
-            alert('Помилка завантаження даних');
-        }
-    };
+    // Додавання обробників подій для полів підрозділу (додавання)
+    const battalionSelect = document.getElementById('battalion');
+    const companySelect = document.getElementById('company');
+    const platoonSelect = document.getElementById('platoon');
 
-    // Функція для завантаження та відображення лідерів
-    const loadLeaders = () => {
-        if (!exercises.length) return;
-
-        // Отримуємо значення фільтра
-        const filterValue = filterLeadersExercise ? filterLeadersExercise.value : '';
-
-        // Групуємо по типу вправи
-        let types = [...new Set(exercises.map(e => e.exerciseType))];
-
-        // Якщо вибрано конкретну вправу, фільтруємо типи
-        if (filterValue) {
-            types = types.filter(type => type === filterValue);
-        }
-
-        let leadersRows = '';
-        types.forEach(type => {
-            // Для кожного типу вправи беремо топ-10
-            const sorted = exercises
-                .filter(e => e.exerciseType === type)
-                .sort((a, b) => b.result - a.result)
-                .slice(0, 10);
-            if (sorted.length) {
-                leadersRows += `<tr><td colspan="5" style="font-weight:bold;text-align:center;background:#f0f0f0;">${type}</td></tr>`;
-                sorted.forEach((e, idx) => {
-                    leadersRows += `<tr><td>${idx+1}</td><td>${e.soldierName}</td><td>${e.gender === 'ч' ? 'Чоловік' : 'Жінка'}</td><td>${e.result}</td><td>${e.unit}</td></tr>`;
-                });
-            }
-        });
-        leadersBody.innerHTML = leadersRows || '<tr><td colspan="5">Немає даних</td></tr>';
-    };
-
-    // Render exercises table
-    const renderExercises = () => {
-        let filteredExercises = exercises;
-
-        // Apply filters
-        const searchTerm = searchInput.value.toLowerCase();
-        const filterValue = filterExercise.value;
-
-        if (searchTerm) {
-            filteredExercises = filteredExercises.filter(exercise => 
-                exercise.soldierName.toLowerCase().includes(searchTerm) ||
-                exercise.unit.toLowerCase().includes(searchTerm)
-            );
-        }
-
-        if (filterValue) {
-            filteredExercises = filteredExercises.filter(exercise => 
-                exercise.exerciseType === filterValue
-            );
-        }
-
-        resultsBody.innerHTML = filteredExercises.map(exercise => `
-            <tr>
-                <td>${exercise.soldierName}</td>
-                <td>${exercise.rank}</td>
-                <td>${exercise.gender === 'ч' ? 'Чоловік' : 'Жінка'}</td>
-                <td>${exercise.exerciseType}</td>
-                <td>${exercise.result}</td>
-                <td>${exercise.unit}</td>
-                <td>${new Date(exercise.date).toLocaleDateString()}</td>
-                <td>
-                    <button class="action-btn edit-btn" data-id="${exercise._id}">Редагувати</button>
-                    <button class="action-btn delete-btn" data-id="${exercise._id}">Видалити</button>
-                </td>
-            </tr>
-        `).join('');
-    };
-
-    // Handle form submission
-    exerciseForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const formData = {
-            soldierName: document.getElementById('soldierName').value,
-            rank: document.getElementById('rank').value,
-            gender: document.getElementById('gender').value, // Додаємо стать
-            exerciseType: document.getElementById('exerciseType').value,
-            result: document.getElementById('result').value,
-            unit: document.getElementById('unit').value,
-            notes: document.getElementById('notes').value
-        };
-
-        try {
-            let response;
-            if (editId) {
-                response = await fetch(`${API_URL}/${editId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
-            } else {
-                response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
-            }
-
-            if (response.ok) {
-                exerciseForm.reset();
-                loadExercises();
-                const submitBtn = exerciseForm.querySelector('button[type="submit"]');
-                submitBtn.textContent = 'Зберегти результат';
-                editId = null;
-                alert(editId ? 'Результат успішно оновлено' : 'Результат успішно збережено');
-            } else {
-                throw new Error(editId ? 'Помилка оновлення' : 'Помилка збереження');
-            }
-        } catch (error) {
-            console.error('Помилка:', error);
-            alert(editId ? 'Помилка оновлення результату' : 'Помилка збереження результату');
-        }
-    });
-
-    // Handle delete
-    resultsBody.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('delete-btn')) {
-            if (confirm('Ви впевнені, що хочете видалити цей запис?')) {
-                const id = e.target.dataset.id;
-                try {
-                    const response = await fetch(`${API_URL}/${id}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (response.ok) {
-                        loadExercises();
-                        alert('Запис успішно видалено');
-                    } else {
-                        throw new Error('Помилка видалення');
-                    }
-                } catch (error) {
-                    console.error('Помилка:', error);
-                    alert('Помилка видалення запису');
-                }
-            }
-        }
-    });
-
-    // Handle edit
-    resultsBody.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('edit-btn')) {
-            const id = e.target.dataset.id;
-            const exercise = exercises.find(ex => ex._id === id);
-
-            if (exercise) {
-                document.getElementById('soldierName').value = exercise.soldierName;
-                document.getElementById('rank').value = exercise.rank;
-                document.getElementById('exerciseType').value = exercise.exerciseType;
-                document.getElementById('result').value = exercise.result;
-                document.getElementById('unit').value = exercise.unit;
-                document.getElementById('notes').value = exercise.notes || '';
-                editId = id;
-                const submitBtn = exerciseForm.querySelector('button[type="submit"]');
-                submitBtn.textContent = 'Оновити';
-            }
-        }
-    });
-
-    // Handle filters
-    searchInput.addEventListener('input', renderExercises);
-    filterExercise.addEventListener('change', renderExercises);
-
-    // Handle leaders filter
-    if (filterLeadersExercise) {
-        filterLeadersExercise.addEventListener('change', loadLeaders);
+    if (battalionSelect && companySelect && platoonSelect) {
+        battalionSelect.addEventListener('change', updateUnitField);
+        companySelect.addEventListener('change', updateUnitField);
+        platoonSelect.addEventListener('change', updateUnitField);
     }
 
-    // Динамічно змінюємо placeholder для результату залежно від типу вправи
-    const resultInput = document.getElementById('result');
-    const exerciseTypeInput = document.getElementById('exerciseType');
-    if (exerciseTypeInput && resultInput) {
-        exerciseTypeInput.addEventListener('change', () => {
-            if (exerciseTypeInput.value === 'Біг 3км') {
-                resultInput.placeholder = 'Наприклад: 11:26 або 11 хв 26 с';
-            } else {
-                resultInput.placeholder = 'Введіть результат';
-            }
-        });
-    }
+    // Додавання обробників подій для полів підрозділу (редагування)
+    const editBattalionSelect = document.getElementById('edit-battalion');
+    const editCompanySelect = document.getElementById('edit-company');
+    const editPlatoonSelect = document.getElementById('edit-platoon');
 
-    // Динамічне оновлення вправ залежно від статі
-    const genderInput = document.getElementById('gender');
-    const EXERCISES = {
-        'ч': [
-            { value: 'Підтягування', label: 'Підтягування' },
-            { value: '6х100', label: '6х100' },
-            { value: 'Біг 3км', label: 'Біг 3км' }
-        ],
-        'ж': [
-            { value: 'Віджимання', label: 'Віджимання' },
-            { value: 'Прес', label: 'Прес' },
-            { value: '4х100', label: '4х100' },
-            { value: 'Біг 3км', label: 'Біг 3км' }
-        ]
-    };
-    function updateExerciseOptions() {
-        const gender = genderInput.value;
-        exerciseTypeInput.innerHTML = '';
-        EXERCISES[gender].forEach(opt => {
-            const option = document.createElement('option');
-            option.value = opt.value;
-            option.textContent = opt.label;
-            exerciseTypeInput.appendChild(option);
-        });
-        // Оновити placeholder для результату
-        if (exerciseTypeInput.value === 'Біг 3км') {
-            resultInput.placeholder = 'Наприклад: 11:26 або 11 хв 26 с';
-        } else {
-            resultInput.placeholder = 'Введіть результат';
-        }
+    if (editBattalionSelect && editCompanySelect && editPlatoonSelect) {
+        editBattalionSelect.addEventListener('change', updateEditUnitField);
+        editCompanySelect.addEventListener('change', updateEditUnitField);
+        editPlatoonSelect.addEventListener('change', updateEditUnitField);
     }
-    if (genderInput && exerciseTypeInput) {
-        genderInput.addEventListener('change', updateExerciseOptions);
-        exerciseTypeInput.addEventListener('change', () => {
-            if (exerciseTypeInput.value === 'Біг 3км') {
-                resultInput.placeholder = 'Наприклад: 11:26 або 11 хв 26 с';
-            } else {
-                resultInput.placeholder = 'Введіть результат';
-            }
-        });
-        updateExerciseOptions(); // ініціалізація при завантаженні
-    }
-
-    // Initial load
-    loadExercises();
 });
+
+// Завантаження результатів вправ
+async function loadExercises() {
+    console.log('Завантаження результатів вправ...');
+    try {
+        const response = await fetch('/api/exercises', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const exercises = await response.json();
+            console.log('Отримано результатів:', exercises.length);
+            displayExercises(exercises);
+        } else {
+            console.error('Помилка завантаження даних');
+        }
+    } catch (error) {
+        console.error('Помилка завантаження даних:', error);
+    }
+}
+
+// Відображення результатів вправ
+function displayExercises(exercises) {
+    console.log('Відображення результатів вправ...');
+    exercisesList.innerHTML = '';
+
+    if (!exercises || exercises.length === 0) {
+        console.log('Немає результатів для відображення');
+        const emptyRow = document.createElement('tr');
+        emptyRow.innerHTML = '<td colspan="7" class="text-center">Немає результатів для відображення</td>';
+        exercisesList.appendChild(emptyRow);
+        return;
+    }
+
+    exercises.forEach(exercise => {
+        const row = document.createElement('tr');
+
+        // Форматування дати
+        const date = new Date(exercise.date);
+        const formattedDate = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
+
+        row.innerHTML = `
+            <td>${exercise.soldierName}</td>
+            <td>${exercise.rank}</td>
+            <td>${exercise.unit}</td>
+            <td>${exercise.exerciseType}</td>
+            <td>${exercise.result}</td>
+            <td>${formattedDate}</td>
+        `;
+
+        // Додавання кнопок редагування/видалення для адміністратора
+        if (currentUser && currentUser.role === 'admin') {
+            const actionsCell = document.createElement('td');
+            actionsCell.innerHTML = `
+                <button class="btn btn-sm btn-outline-primary edit-btn" data-id="${exercise._id}">
+                    Редагувати
+                </button>
+                <button class="btn btn-sm btn-outline-danger delete-btn ms-2" data-id="${exercise._id}">
+                    Видалити
+                </button>
+            `;
+            row.appendChild(actionsCell);
+
+            // Додавання обробників подій для кнопок
+            const editBtn = actionsCell.querySelector('.edit-btn');
+            const deleteBtn = actionsCell.querySelector('.delete-btn');
+
+            editBtn.addEventListener('click', () => editExercise(exercise._id));
+            deleteBtn.addEventListener('click', () => deleteExercise(exercise._id));
+        }
+
+        exercisesList.appendChild(row);
+    });
+}
+
+// Видалення результату вправи
+async function deleteExercise(id) {
+    if (!confirm('Ви впевнені, що хочете видалити цей результат?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/exercises/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            },
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            showSuccessMessage('Результат успішно видалено');
+            loadExercises(); // Перезавантаження даних
+        } else {
+            const data = await response.json();
+            showErrorMessage(data.message || 'Помилка видалення');
+        }
+    } catch (error) {
+        showErrorMessage('Помилка зєднання з сервером');
+        console.error('Помилка видалення:', error);
+    }
+}
+
+// Редагування результату вправи
+async function editExercise(id) {
+    try {
+        // Отримання даних про вправу з сервера
+        const response = await fetch(`/api/exercises/${id}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            },
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const exercise = await response.json();
+
+            // Заповнення форми даними
+            document.getElementById('edit-exercise-id').value = exercise._id;
+            document.getElementById('edit-soldierName').value = exercise.soldierName;
+            document.getElementById('edit-rank').value = exercise.rank;
+            document.getElementById('edit-gender').value = exercise.gender;
+            document.getElementById('edit-exerciseType').value = exercise.exerciseType;
+            document.getElementById('edit-result').value = exercise.result;
+            document.getElementById('edit-notes').value = exercise.notes || '';
+
+            // Розбір підрозділу на складові (батальйон, рота, взвод)
+            const unitParts = parseUnitString(exercise.unit);
+            if (unitParts) {
+                document.getElementById('edit-battalion').value = unitParts.battalion;
+                document.getElementById('edit-company').value = unitParts.company;
+                document.getElementById('edit-platoon').value = unitParts.platoon;
+                document.getElementById('edit-unit').value = exercise.unit;
+            }
+
+            // Відкриття модального вікна
+            const editModal = new bootstrap.Modal(document.getElementById('edit-exercise-modal'));
+            editModal.show();
+        } else {
+            const data = await response.json();
+            showErrorMessage(data.message || 'Помилка отримання даних');
+        }
+    } catch (error) {
+        showErrorMessage('Помилка з\'єднання з сервером');
+        console.error('Помилка отримання даних для редагування:', error);
+    }
+}
+
+// Функція для розбору рядка підрозділу на складові
+function parseUnitString(unitString) {
+    try {
+        // Приклад: "1 батальйон, 2 рота, 3 взвод"
+        const parts = unitString.split(',').map(part => part.trim());
+
+        // Отримання номера батальйону
+        const battalionMatch = parts[0].match(/(\d+)/);
+        const battalion = battalionMatch ? battalionMatch[1] : '';
+
+        // Отримання номера роти
+        const companyMatch = parts[1].match(/(\d+)/);
+        const company = companyMatch ? companyMatch[1] : '';
+
+        // Отримання номера взводу
+        const platoonMatch = parts[2].match(/(\d+)/);
+        const platoon = platoonMatch ? platoonMatch[1] : '';
+
+        return { battalion, company, platoon };
+    } catch (error) {
+        console.error('Помилка розбору рядка підрозділу:', error);
+        return null;
+    }
+}
+
+// Оновлення результату вправи
+async function updateExercise() {
+    // Отримання ID вправи
+    const exerciseId = document.getElementById('edit-exercise-id').value;
+
+    // Отримання даних з форми
+    const soldierName = document.getElementById('edit-soldierName').value;
+    const rank = document.getElementById('edit-rank').value;
+    const gender = document.getElementById('edit-gender').value;
+
+    // Отримання значень підрозділу з трьох окремих полів
+    const battalion = document.getElementById('edit-battalion').value;
+    const company = document.getElementById('edit-company').value;
+    const platoon = document.getElementById('edit-platoon').value;
+
+    // Формування повного значення підрозділу
+    const unit = `${battalion} батальйон, ${company} рота, ${platoon} взвод`;
+
+    // Оновлення прихованого поля unit
+    document.getElementById('edit-unit').value = unit;
+
+    const exerciseType = document.getElementById('edit-exerciseType').value;
+    const result = document.getElementById('edit-result').value;
+    const notes = document.getElementById('edit-notes').value;
+
+    // Перевірка обов'язкових полів
+    if (!soldierName || !rank || !gender || !battalion || !company || !platoon || !exerciseType || !result) {
+        showErrorMessage('Будь ласка, заповніть всі обов\'язкові поля');
+        return;
+    }
+
+    // Створення об'єкту з даними
+    const exerciseData = {
+        soldierName,
+        rank,
+        gender,
+        unit,
+        exerciseType,
+        result,
+        notes
+    };
+
+    try {
+        // Відправка запиту на сервер
+        const response = await fetch(`/api/exercises/${exerciseId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(exerciseData),
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const updatedExercise = await response.json();
+            console.log('Результат успішно оновлено:', updatedExercise);
+
+            // Закриття модального вікна
+            const editModal = bootstrap.Modal.getInstance(document.getElementById('edit-exercise-modal'));
+            editModal.hide();
+
+            // Відображення повідомлення про успіх
+            showSuccessMessage('Результат успішно оновлено');
+
+            // Оновлення списку результатів
+            loadExercises();
+        } else {
+            const data = await response.json();
+            showErrorMessage(data.message || 'Помилка оновлення результату');
+        }
+    } catch (error) {
+        showErrorMessage('Помилка з\'єднання з сервером');
+        console.error('Помилка оновлення результату:', error);
+    }
+}
+
+// Функція для додавання нового результату
+async function addExercise() {
+    // Отримання даних з форми
+    const soldierName = document.getElementById('soldierName').value;
+    const rank = document.getElementById('rank').value;
+    const gender = document.getElementById('gender').value;
+
+    // Отримання значень підрозділу з трьох окремих полів
+    const battalion = document.getElementById('battalion').value;
+    const company = document.getElementById('company').value;
+    const platoon = document.getElementById('platoon').value;
+
+    // Формування повного значення підрозділу
+    const unit = `${battalion} батальйон, ${company} рота, ${platoon} взвод`;
+
+    // Оновлення прихованого поля unit
+    document.getElementById('unit').value = unit;
+
+    const exerciseType = document.getElementById('exerciseType').value;
+    const result = document.getElementById('result').value;
+    const notes = document.getElementById('notes').value;
+
+    // Перевірка обов'язкових полів
+    if (!soldierName || !rank || !gender || !battalion || !company || !platoon || !exerciseType || !result) {
+        showErrorMessage('Будь ласка, заповніть всі обов\'язкові поля');
+        return;
+    }
+
+    // Створення об'єкту з даними
+    const exerciseData = {
+        soldierName,
+        rank,
+        gender,
+        unit,
+        exerciseType,
+        result,
+        notes
+    };
+
+    try {
+        // Відправка запиту на сервер
+        const response = await fetch('/api/exercises', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(exerciseData),
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const savedExercise = await response.json();
+            console.log('Результат успішно додано:', savedExercise);
+
+            // Закриття модального вікна
+            addExerciseModal.hide();
+
+            // Очищення форми
+            document.getElementById('add-exercise-form').reset();
+
+            // Відображення повідомлення про успіх
+            showSuccessMessage('Результат успішно додано');
+
+            // Оновлення списку результатів з невеликою затримкою
+            // щоб дати серверу час зберегти новий результат
+            setTimeout(() => {
+                loadExercises();
+            }, 500);
+        } else {
+            const data = await response.json();
+            showErrorMessage(data.message || 'Помилка додавання результату');
+        }
+    } catch (error) {
+        showErrorMessage('Помилка з\'єднання з сервером');
+        console.error('Помилка додавання результату:', error);
+    }
+}
+
+// Функція для оновлення прихованого поля unit (для додавання)
+function updateUnitField() {
+    const battalion = document.getElementById('battalion').value;
+    const company = document.getElementById('company').value;
+    const platoon = document.getElementById('platoon').value;
+
+    if (battalion && company && platoon) {
+        const unit = `${battalion} батальйон, ${company} рота, ${platoon} взвод`;
+        document.getElementById('unit').value = unit;
+    }
+}
+
+// Функція для оновлення прихованого поля unit (для редагування)
+function updateEditUnitField() {
+    const battalion = document.getElementById('edit-battalion').value;
+    const company = document.getElementById('edit-company').value;
+    const platoon = document.getElementById('edit-platoon').value;
+
+    if (battalion && company && platoon) {
+        const unit = `${battalion} батальйон, ${company} рота, ${platoon} взвод`;
+        document.getElementById('edit-unit').value = unit;
+    }
+}
+
+// Ці обробники тепер додаються в блоці DOMContentLoaded вище

@@ -3,120 +3,381 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Облік фізичної підготовки</title>
+    <title>Система обліку результатів фізичної підготовки</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="top-banner">
-        <h1 class="banner-title">Облік результатів фізичної підготовки</h1>
-    </div>
-    <div class="container">
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <ul class="nav nav-tabs card-header-tabs" id="auth-tabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active text-white" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab" aria-controls="login" aria-selected="true">Вхід</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link text-white" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab" aria-controls="register" aria-selected="false">Реєстрація</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="auth-tabs-content">
+                            <!-- Форма входу -->
+                            <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
+                                <h3 class="card-title text-center mb-4">Вхід в систему</h3>
+                                <form id="login-form">
+                                    <div class="mb-3">
+                                        <label for="login-username" class="form-label">Ім'я користувача</label>
+                                        <input type="text" class="form-control" id="login-username" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="login-password" class="form-label">Пароль</label>
+                                        <input type="password" class="form-control" id="login-password" required>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary">Увійти</button>
+                                    </div>
+                                </form>
+                            </div>
 
-        <!-- Кнопки навігації -->
-        <div class="show-results-btn-wrapper" style="margin-bottom: 20px;">
-            <button id="showFormBtn" class="form-btn">Додати результат</button>
-            <button id="showResultsBtn">Показати результати</button>
-            <button id="showLeadersBtn" class="leaders-btn">ЛІДЕРИ</button>
-        </div>
+                            <!-- Форма реєстрації -->
+                            <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
+                                <h3 class="card-title text-center mb-4">Реєстрація нового користувача</h3>
+                                <form id="register-form">
+                                    <div class="mb-3">
+                                        <label for="register-username" class="form-label">Ім'я користувача</label>
+                                        <input type="text" class="form-control" id="register-username" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="register-password" class="form-label">Пароль</label>
+                                        <input type="password" class="form-control" id="register-password" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="register-confirm-password" class="form-label">Підтвердження пароля</label>
+                                        <input type="password" class="form-control" id="register-confirm-password" required>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary">Зареєструватися</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="form-container">
-            <h2>Додати новий результат</h2>
-            <form id="exerciseForm">
-                <div class="form-group">
-                    <label for="soldierName">ПІБ військовослужбовця:</label>
-                    <input type="text" id="soldierName" required>
-                </div>
-                <div class="form-group">
-                    <label for="rank">Звання:</label>
-                    <input type="text" id="rank" required>
-                </div>
-                <div class="form-group">
-                    <label for="gender">Стать:</label>
-                    <select id="gender" required>
-                        <option value="ч">Чоловіча</option>
-                        <option value="ж">Жіноча</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="exerciseType">Тип вправи:</label>
-                    <select id="exerciseType" required>
-                        <!-- Варіанти будуть динамічно додаватись JS -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="result">Результат:</label>
-                    <input type="text" id="result" required placeholder="Введіть результат">
-                </div>
-                <div class="form-group">
-                    <label for="unit">Підрозділ:</label>
-                    <input type="text" id="unit" required>
-                </div>
-                <div class="form-group">
-                    <label for="notes">Примітки:</label>
-                    <textarea id="notes"></textarea>
-                </div>
-                <button type="submit">Зберегти результат</button>
-            </form>
-        </div>
+                <!-- Повідомлення про помилку -->
+                <div class="alert alert-danger mt-3 d-none" id="error-message" role="alert"></div>
 
-        <div id="resultsSection" class="results-container">
-            <h2>Результати</h2>
-            <div class="filters">
-                <input type="text" id="searchInput" placeholder="Пошук...">
-                <select id="filterExercise">
-                    <option value="">Всі вправи</option>
-                    <option value="Підтягування">Підтягування</option>
-                    <option value="Біг 3км">Біг 3км</option>
-                    <option value="Віджимання">Віджимання</option>
-                    <option value="Прес">Прес</option>
-                    <option value="6х100">6х100</option>
-                    <option value="4х100">4х100</option>
-                </select>
+                <!-- Повідомлення про успіх -->
+                <div class="alert alert-success mt-3 d-none" id="success-message" role="alert"></div>
             </div>
-            <table id="resultsTable">
-                <thead>
-                    <tr>
-                        <th>ПІБ</th>
-                        <th>Звання</th>
-                        <th>Стать</th>
-                        <th>Вправа</th>
-                        <th>Результат</th>
-                        <th>Підрозділ</th>
-                        <th>Дата</th>
-                        <th>Дії</th>
-                    </tr>
-                </thead>
-                <tbody id="resultsBody"></tbody>
-            </table>
-        </div>
-
-        <div id="leadersSection" class="results-container" style="margin-bottom: 30px;">
-            <h2 id="leadersTitle">Лідери по вправах</h2>
-            <div class="filters">
-                <select id="filterLeadersExercise">
-                    <option value="">Всі вправи</option>
-                    <option value="Підтягування">Підтягування</option>
-                    <option value="Біг 3км">Біг 3км</option>
-                    <option value="Віджимання">Віджимання</option>
-                    <option value="Прес">Прес</option>
-                    <option value="6х100">6х100</option>
-                    <option value="4х100">4х100</option>
-                </select>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Місце</th>
-                        <th>ПІБ</th>
-                        <th>Стать</th>
-                        <th>Результат</th>
-                        <th>Підрозділ</th>
-                    </tr>
-                </thead>
-                <tbody id="leadersBody"></tbody>
-            </table>
         </div>
     </div>
+
+    <!-- Прихований контейнер для основного контенту (відображається після авторизації) -->
+    <div class="container mt-4 d-none" id="main-content">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1>Система обліку результатів фізичної підготовки</h1>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="user-info mb-2">
+                    Користувач: <span id="current-username"></span>
+                    <span class="badge bg-info ms-2" id="user-role"></span>
+                </div>
+                <button id="logout-btn" class="btn btn-outline-danger">Вийти</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Результати фізичної підготовки</h5>
+                        <div id="admin-controls" class="d-none">
+                            <button id="add-exercise-btn" class="btn btn-sm btn-light">Додати результат</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="exercises-table">
+                                <thead>
+                                    <tr>
+                                        <th>Військовослужбовець</th>
+                                        <th>Звання</th>
+                                        <th>Підрозділ</th>
+                                        <th>Вправа</th>
+                                        <th>Результат</th>
+                                        <th>Дата</th>
+                                        <th id="actions-header" class="d-none">Дії</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="exercises-list">
+                                    <!-- Тут будуть результати -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальне вікно для додавання нового результату -->
+    <div class="modal fade" id="add-exercise-modal" tabindex="-1" aria-labelledby="add-exercise-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="add-exercise-modal-label">Додати новий результат</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-exercise-form">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="soldierName" class="form-label">Ім'я військовослужбовця</label>
+                                <input type="text" class="form-control" id="soldierName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="rank" class="form-label">Звання</label>
+                                <select class="form-select" id="rank" required>
+                                    <option value="">Виберіть звання</option>
+                                    <!-- Рядовий склад -->
+                                    <option value="Рекрут">Рекрут</option>
+                                    <option value="Солдат">Солдат</option>
+                                    <option value="Старший солдат">Старший солдат</option>
+                                    <!-- Сержантський склад -->
+                                    <option value="Молодший сержант">Молодший сержант</option>
+                                    <option value="Сержант">Сержант</option>
+                                    <option value="Старший сержант">Старший сержант</option>
+                                    <option value="Головний сержант">Головний сержант</option>
+                                    <option value="Штаб-сержант">Штаб-сержант</option>
+                                    <option value="Майстер-сержант">Майстер-сержант</option>
+                                    <option value="Старший майстер-сержант">Старший майстер-сержант</option>
+                                    <option value="Головний майстер-сержант">Головний майстер-сержант</option>
+                                    <!-- Молодший офіцерський склад -->
+                                    <option value="Молодший лейтенант">Молодший лейтенант</option>
+                                    <option value="Лейтенант">Лейтенант</option>
+                                    <option value="Старший лейтенант">Старший лейтенант</option>
+                                    <option value="Капітан">Капітан</option>
+                                    <!-- Старший офіцерський склад -->
+                                    <option value="Майор">Майор</option>
+                                    <option value="Підполковник">Підполковник</option>
+                                    <option value="Полковник">Полковник</option>
+                                    <!-- Вищий офіцерський склад -->
+                                    <option value="Бригадний генерал">Бригадний генерал</option>
+                                    <option value="Генерал-майор">Генерал-майор</option>
+                                    <option value="Генерал-лейтенант">Генерал-лейтенант</option>
+                                    <option value="Генерал">Генерал</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="gender" class="form-label">Стать</label>
+                                <select class="form-select" id="gender" required>
+                                    <option value="">Виберіть стать</option>
+                                    <option value="ч">Чоловіча</option>
+                                    <option value="ж">Жіноча</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Підрозділ</label>
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <select class="form-select" id="battalion" required>
+                                            <option value="">Батальйон</option>
+                                            <option value="1">1 батальйон</option>
+                                            <option value="2">2 батальйон</option>
+                                            <option value="3">3 батальйон</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select class="form-select" id="company" required>
+                                            <option value="">Рота</option>
+                                            <option value="1">1 рота</option>
+                                            <option value="2">2 рота</option>
+                                            <option value="3">3 рота</option>
+                                            <option value="4">4 рота</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select class="form-select" id="platoon" required>
+                                            <option value="">Взвод</option>
+                                            <option value="1">1 взвод</option>
+                                            <option value="2">2 взвод</option>
+                                            <option value="3">3 взвод</option>
+                                            <option value="4">4 взвод</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Hidden field to store the combined unit value -->
+                                <input type="hidden" id="unit" name="unit">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="exerciseType" class="form-label">Тип вправи</label>
+                                <select class="form-select" id="exerciseType" required>
+                                    <option value="">Виберіть тип вправи</option>
+                                    <option value="Підтягування">Підтягування</option>
+                                    <option value="Біг 3км">Біг 3км</option>
+                                    <option value="Віджимання">Віджимання</option>
+                                    <option value="Прес">Прес</option>
+                                    <option value="6х100">6х100</option>
+                                    <option value="4х100">4х100</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="result" class="form-label">Результат</label>
+                                <input type="text" class="form-control" id="result" required>
+                                <small class="form-text text-muted">Для вправ з часом використовуйте формат ММ:СС</small>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Примітки</label>
+                            <textarea class="form-control" id="notes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                    <button type="button" class="btn btn-primary" id="save-exercise-btn">Зберегти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальне вікно для редагування результату -->
+    <div class="modal fade" id="edit-exercise-modal" tabindex="-1" aria-labelledby="edit-exercise-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="edit-exercise-modal-label">Редагувати результат</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-exercise-form">
+                        <input type="hidden" id="edit-exercise-id">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="edit-soldierName" class="form-label">Ім'я військовослужбовця</label>
+                                <input type="text" class="form-control" id="edit-soldierName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit-rank" class="form-label">Звання</label>
+                                <select class="form-select" id="edit-rank" required>
+                                    <option value="">Виберіть звання</option>
+                                    <!-- Рядовий склад -->
+                                    <option value="Рекрут">Рекрут</option>
+                                    <option value="Солдат">Солдат</option>
+                                    <option value="Старший солдат">Старший солдат</option>
+                                    <!-- Сержантський склад -->
+                                    <option value="Молодший сержант">Молодший сержант</option>
+                                    <option value="Сержант">Сержант</option>
+                                    <option value="Старший сержант">Старший сержант</option>
+                                    <option value="Головний сержант">Головний сержант</option>
+                                    <option value="Штаб-сержант">Штаб-сержант</option>
+                                    <option value="Майстер-сержант">Майстер-сержант</option>
+                                    <option value="Старший майстер-сержант">Старший майстер-сержант</option>
+                                    <option value="Головний майстер-сержант">Головний майстер-сержант</option>
+                                    <!-- Молодший офіцерський склад -->
+                                    <option value="Молодший лейтенант">Молодший лейтенант</option>
+                                    <option value="Лейтенант">Лейтенант</option>
+                                    <option value="Старший лейтенант">Старший лейтенант</option>
+                                    <option value="Капітан">Капітан</option>
+                                    <!-- Старший офіцерський склад -->
+                                    <option value="Майор">Майор</option>
+                                    <option value="Підполковник">Підполковник</option>
+                                    <option value="Полковник">Полковник</option>
+                                    <!-- Вищий офіцерський склад -->
+                                    <option value="Бригадний генерал">Бригадний генерал</option>
+                                    <option value="Генерал-майор">Генерал-майор</option>
+                                    <option value="Генерал-лейтенант">Генерал-лейтенант</option>
+                                    <option value="Генерал">Генерал</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="edit-gender" class="form-label">Стать</label>
+                                <select class="form-select" id="edit-gender" required>
+                                    <option value="">Виберіть стать</option>
+                                    <option value="ч">Чоловіча</option>
+                                    <option value="ж">Жіноча</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Підрозділ</label>
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <select class="form-select" id="edit-battalion" required>
+                                            <option value="">Батальйон</option>
+                                            <option value="1">1 батальйон</option>
+                                            <option value="2">2 батальйон</option>
+                                            <option value="3">3 батальйон</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select class="form-select" id="edit-company" required>
+                                            <option value="">Рота</option>
+                                            <option value="1">1 рота</option>
+                                            <option value="2">2 рота</option>
+                                            <option value="3">3 рота</option>
+                                            <option value="4">4 рота</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select class="form-select" id="edit-platoon" required>
+                                            <option value="">Взвод</option>
+                                            <option value="1">1 взвод</option>
+                                            <option value="2">2 взвод</option>
+                                            <option value="3">3 взвод</option>
+                                            <option value="4">4 взвод</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Hidden field to store the combined unit value -->
+                                <input type="hidden" id="edit-unit" name="unit">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="edit-exerciseType" class="form-label">Тип вправи</label>
+                                <select class="form-select" id="edit-exerciseType" required>
+                                    <option value="">Виберіть тип вправи</option>
+                                    <option value="Підтягування">Підтягування</option>
+                                    <option value="Біг 3км">Біг 3км</option>
+                                    <option value="Віджимання">Віджимання</option>
+                                    <option value="Прес">Прес</option>
+                                    <option value="6х100">6х100</option>
+                                    <option value="4х100">4х100</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit-result" class="form-label">Результат</label>
+                                <input type="text" class="form-control" id="edit-result" required>
+                                <small class="form-text text-muted">Для вправ з часом використовуйте формат ММ:СС</small>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-notes" class="form-label">Примітки</label>
+                            <textarea class="form-control" id="edit-notes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                    <button type="button" class="btn btn-primary" id="update-exercise-btn">Зберегти зміни</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
